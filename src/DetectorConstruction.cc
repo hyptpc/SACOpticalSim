@@ -639,6 +639,7 @@ void DetectorConstruction::ConstructSAC()
   const G4double pmt_casing_radius = gConfMan.GetDouble("pmt_casing_radius") * mm;
   const G4double pmt_window_radius = gConfMan.GetDouble("pmt_window_radius") * mm;
   const G4double pmt_thickness = gConfMan.GetDouble("pmt_thickness") * mm;
+  const G4int pmt_channel = gConfMan.GetInt("pmt_channel");
   const G4ThreeVector origin(0, 0, 0);
 
   // ----------------------
@@ -701,22 +702,45 @@ void DetectorConstruction::ConstructSAC()
   auto rotY = new G4RotationMatrix();
   rotY->rotateY(90. * deg);
 
-  for (int i = 0; i < 3; ++i)
+  // old SAC
+  if (pmt_channel == 8)
   {
-    double x_pos = (i - 1) * pmt_x_spacing;
-    auto upper_trans = G4Transform3D(*rotX, G4ThreeVector(x_pos, gel_size.y() / 2 + frame_thickness / 2, 0));
-    auto lower_trans = G4Transform3D(*rotX, G4ThreeVector(x_pos, -gel_size.y() / 2 - frame_thickness / 2, 0));
-    frame = new G4SubtractionSolid("Frame", frame, hole, upper_trans);
-    frame = new G4SubtractionSolid("Frame", frame, hole, lower_trans);
-  }
+    for (int i = 0; i < 3; ++i)
+    {
+      double x_pos = (i - 1) * pmt_x_spacing;
+      auto upper_trans = G4Transform3D(*rotX, G4ThreeVector(x_pos, gel_size.y() / 2 + frame_thickness / 2, 0));
+      auto lower_trans = G4Transform3D(*rotX, G4ThreeVector(x_pos, -gel_size.y() / 2 - frame_thickness / 2, 0));
+      frame = new G4SubtractionSolid("Frame", frame, hole, upper_trans);
+      frame = new G4SubtractionSolid("Frame", frame, hole, lower_trans);
+    }
 
-  for (int i = 0; i < 4; ++i)
-  {
-    double y_pos = (i - 1.5) * pmt_y_spacing;
+    double y_pos = 0;
     auto left_trans = G4Transform3D(*rotY, G4ThreeVector(-gel_size.x() / 2 - frame_thickness / 2, y_pos, 0));
     auto right_trans = G4Transform3D(*rotY, G4ThreeVector(gel_size.x() / 2 + frame_thickness / 2, y_pos, 0));
     frame = new G4SubtractionSolid("Frame", frame, hole, left_trans);
     frame = new G4SubtractionSolid("Frame", frame, hole, right_trans);
+  }
+
+  // new SAC
+  if (pmt_channel == 14)
+  {
+    for (int i = 0; i < 3; ++i)
+    {
+      double x_pos = (i - 1) * pmt_x_spacing;
+      auto upper_trans = G4Transform3D(*rotX, G4ThreeVector(x_pos, gel_size.y() / 2 + frame_thickness / 2, 0));
+      auto lower_trans = G4Transform3D(*rotX, G4ThreeVector(x_pos, -gel_size.y() / 2 - frame_thickness / 2, 0));
+      frame = new G4SubtractionSolid("Frame", frame, hole, upper_trans);
+      frame = new G4SubtractionSolid("Frame", frame, hole, lower_trans);
+    }
+
+    for (int i = 0; i < 4; ++i)
+    {
+      double y_pos = (i - 1.5) * pmt_y_spacing;
+      auto left_trans = G4Transform3D(*rotY, G4ThreeVector(-gel_size.x() / 2 - frame_thickness / 2, y_pos, 0));
+      auto right_trans = G4Transform3D(*rotY, G4ThreeVector(gel_size.x() / 2 + frame_thickness / 2, y_pos, 0));
+      frame = new G4SubtractionSolid("Frame", frame, hole, left_trans);
+      frame = new G4SubtractionSolid("Frame", frame, hole, right_trans);
+    }
   }
 
   auto frame_lv = new G4LogicalVolume(frame, m_material_map["Teflon"], "TeflonFrameLV");
@@ -734,22 +758,45 @@ void DetectorConstruction::ConstructSAC()
 
   pmt_window_lv->SetVisAttributes(G4VisAttributes(G4Colour::Yellow()));
 
-  for (int i = 0; i < 3; ++i)
+  // old SAC
+  if (pmt_channel == 8)
   {
-    double x_pos = (i - 1) * pmt_x_spacing;
-    new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2, 0), pmt_casing_lv, "PMTCasingUpper", mother_lv, false, i, m_check_overlaps);
-    new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2, 0), pmt_casing_lv, "PMTCasingLower", mother_lv, false, i + 3, m_check_overlaps);
-    new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2, 0), pmt_window_lv, "PMTWindowUpper", mother_lv, false, i, m_check_overlaps);
-    new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2, 0), pmt_window_lv, "PMTWindowLower", mother_lv, false, i + 3, m_check_overlaps);
+    for (int i = 0; i < 3; ++i)
+    {
+      double x_pos = (i - 1) * pmt_x_spacing;
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2, 0), pmt_casing_lv, "PMTCasingUpper", mother_lv, false, i, m_check_overlaps);
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2, 0), pmt_casing_lv, "PMTCasingLower", mother_lv, false, i + 3, m_check_overlaps);
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2, 0), pmt_window_lv, "PMTWindowUpper", mother_lv, false, i, m_check_overlaps);
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2, 0), pmt_window_lv, "PMTWindowLower", mother_lv, false, i + 3, m_check_overlaps);
+    }
+
+    double y_pos = 0;
+    new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2, y_pos, 0), pmt_casing_lv, "PMTCasingLeft", mother_lv, false, 0, m_check_overlaps);
+    new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2, y_pos, 0), pmt_casing_lv, "PMTCasingRight", mother_lv, false, 1, m_check_overlaps);
+    new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2, y_pos, 0), pmt_window_lv, "PMTWindowLeft", mother_lv, false, 0, m_check_overlaps);
+    new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2, y_pos, 0), pmt_window_lv, "PMTWindowRight", mother_lv, false, 1, m_check_overlaps);
   }
 
-  for (int i = 0; i < 4; ++i)
+  // new SAC
+  if (pmt_channel == 14)
   {
-    double y_pos = (i - 1.5) * pmt_y_spacing;
-    new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2, y_pos, 0), pmt_casing_lv, "PMTCasingLeft", mother_lv, false, i, m_check_overlaps);
-    new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2, y_pos, 0), pmt_casing_lv, "PMTCasingRight", mother_lv, false, i + 4, m_check_overlaps);
-    new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2, y_pos, 0), pmt_window_lv, "PMTWindowLeft", mother_lv, false, i, m_check_overlaps);
-    new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2, y_pos, 0), pmt_window_lv, "PMTWindowRight", mother_lv, false, i + 4, m_check_overlaps);
+    for (int i = 0; i < 3; ++i)
+    {
+      double x_pos = (i - 1) * pmt_x_spacing;
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2, 0), pmt_casing_lv, "PMTCasingUpper", mother_lv, false, i, m_check_overlaps);
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2, 0), pmt_casing_lv, "PMTCasingLower", mother_lv, false, i + 3, m_check_overlaps);
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2, 0), pmt_window_lv, "PMTWindowUpper", mother_lv, false, i, m_check_overlaps);
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2, 0), pmt_window_lv, "PMTWindowLower", mother_lv, false, i + 3, m_check_overlaps);
+    }
+
+    for (int i = 0; i < 4; ++i)
+    {
+      double y_pos = (i - 1.5) * pmt_y_spacing;
+      new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2, y_pos, 0), pmt_casing_lv, "PMTCasingLeft", mother_lv, false, i, m_check_overlaps);
+      new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2, y_pos, 0), pmt_casing_lv, "PMTCasingRight", mother_lv, false, i + 4, m_check_overlaps);
+      new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2, y_pos, 0), pmt_window_lv, "PMTWindowLeft", mother_lv, false, i, m_check_overlaps);
+      new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2, y_pos, 0), pmt_window_lv, "PMTWindowRight", mother_lv, false, i + 4, m_check_overlaps);
+    }
   }
 
   // Set sensitive detector
