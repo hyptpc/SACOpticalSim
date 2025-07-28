@@ -18,7 +18,7 @@
 /vis/drawVolume
 
 # Set viewpoint
-/vis/viewer/set/viewpointThetaPhi 90. 0.
+/vis/viewer/set/viewpointThetaPhi 40 40
 
 # Set zoom level
 /vis/viewer/zoom 1.
@@ -48,3 +48,5 @@
 
 # Flush viewer for file-based drivers (optional)
 #/vis/viewer/flush
+
+/run/beamOn 0

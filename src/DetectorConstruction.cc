@@ -1,5 +1,5 @@
 #include "DetectorConstruction.hh"
-#include "MPPCSD.hh"
+#include "PMTSD.hh"
 #include "G4Box.hh"
 #include "G4Element.hh"
 #include "G4GDMLParser.hh"
@@ -168,8 +168,8 @@ void DetectorConstruction::ConstructMaterials()
   m_material_map[name]->AddElement(m_element_map["Silicon"], natoms = 1);
   m_material_map[name]->AddElement(m_element_map["Oxygen"], natoms = 2);
 
-  // blacksheet
-  name = "Blacksheet";
+  // blackSheet
+  name = "BlackSheet";
   m_material_map[name] = new G4Material(name, density = 0.95 * g / cm3, nel = 2);
   m_material_map[name]->AddElement(m_element_map["Carbon"], natoms = 1);
   m_material_map[name]->AddElement(m_element_map["Hydrogen"], natoms = 2);
@@ -533,8 +533,6 @@ void DetectorConstruction::AddOpticalProperties()
   n_entries = photon_energy.size();
   quartz_prop->AddProperty("ABSLENGTH", &photon_energy[0], &absorption_length[0], n_entries);
 
-  m_material_map["QuartzKVC"]->SetMaterialPropertiesTable(quartz_prop);
-
   // +---------+
   // | Aerogel |
   // +---------+
@@ -575,7 +573,7 @@ void DetectorConstruction::AddOpticalProperties()
 
   blacksheet_prop->AddProperty("RINDEX", &photon_energy[0], &refractive_index[0], n_entries);
   blacksheet_prop->AddProperty("ABSLENGTH", &photon_energy[0], &absorption_length[0], n_entries);
-  m_material_map["Blacksheet"]->SetMaterialPropertiesTable(blacksheet_prop);
+  m_material_map["BlackSheet"]->SetMaterialPropertiesTable(blacksheet_prop);
 
   // +-----------------+
   // | Teflon Property |
@@ -607,7 +605,7 @@ void DetectorConstruction::AddOpticalProperties()
   m_material_map["Glass"]->SetMaterialPropertiesTable(pmt_prop);
 
   // +----------------------------+
-  // | PMT surface (POM) Property |
+  // | PMT casing (POM) Property |
   // +----------------------------+
   auto pom_prop = new G4MaterialPropertiesTable();
   photon_energy = {1.3 * eV, 7.0 * eV};
@@ -628,22 +626,28 @@ void DetectorConstruction::ConstructSAC()
   // ----------------------
   // パラメータ定義
   // ----------------------
-  const G4ThreeVector sac_size = G4ThreeVector(113.8 * mm, 145.0 * mm, 33.0 * mm); // SAC aerogel size
-  const G4double teflon_thickness = 3.0 * mm;
-  const G4double frame_thickness = 10.0 * mm;
-  const G4double pmt_spacing = 25.0 * mm;
-  const G4double pmt_radius = 25.8 * mm;   // PMT window radius
-  const G4double pmt_thickness = 1.0 * mm; // PMT window thickness
+  const G4ThreeVector gel_size(
+      gConfMan.GetDouble("gel_size_x") * mm,
+      gConfMan.GetDouble("gel_size_y") * mm,
+      gConfMan.GetDouble("gel_size_z") * mm);
 
+  const G4double teflon_thickness = gConfMan.GetDouble("teflon_thickness") * mm;
+  const G4double BlackSheet_thickness = gConfMan.GetDouble("BlackSheet_thickness") * mm;
+  const G4double frame_thickness = gConfMan.GetDouble("frame_thickness") * mm;
+  const G4double pmt_x_spacing = gConfMan.GetDouble("pmt_x_spacing") * mm;
+  const G4double pmt_y_spacing = gConfMan.GetDouble("pmt_y_spacing") * mm;
+  const G4double pmt_casing_radius = gConfMan.GetDouble("pmt_casing_radius") * mm;
+  const G4double pmt_window_radius = gConfMan.GetDouble("pmt_window_radius") * mm;
+  const G4double pmt_thickness = gConfMan.GetDouble("pmt_thickness") * mm;
   const G4ThreeVector origin(0, 0, 0);
 
   // ----------------------
-  // 母ボリューム（Air）
+  // Mother Volume（Air）
   // ----------------------
   auto mother_solid = new G4Box("SACMotherSolid",
-                                sac_size.x() / 2 + 50 * mm,
-                                sac_size.y() / 2 + 50 * mm,
-                                sac_size.z() / 2 + 50 * mm);
+                                gel_size.x() / 2 + 50 * mm,
+                                gel_size.y() / 2 + 50 * mm,
+                                gel_size.z() / 2 + 50 * mm);
   auto mother_lv = new G4LogicalVolume(mother_solid,
                                        m_material_map["Air"],
                                        "SACMotherLV");
@@ -653,84 +657,105 @@ void DetectorConstruction::ConstructSAC()
   // ----------------------
   // Aerogel
   // ----------------------
-  auto sac_solid = new G4Box("SACSolid", sac_size.x() / 2, sac_size.y() / 2, sac_size.z() / 2);
-  auto sac_lv = new G4LogicalVolume(sac_solid, m_material_map["Aerogel"], "SACLV");
-  new G4PVPlacement(nullptr, origin, sac_lv, "SACPV", mother_lv, false, 0, m_check_overlaps);
-  sac_lv->SetVisAttributes(G4Colour::Cyan());
+  auto gel_solid = new G4Box("GelSolid", gel_size.x() / 2, gel_size.y() / 2, gel_size.z() / 2);
+  auto gel_lv = new G4LogicalVolume(gel_solid, m_material_map["Aerogel"], "GelLV");
+  new G4PVPlacement(nullptr, origin, gel_lv, "GelPV", mother_lv, false, 0, m_check_overlaps);
+  gel_lv->SetVisAttributes(G4Colour::Cyan());
 
   // ----------------------
-  // 上下 Teflon シート
+  // Teflon Sheet
   // ----------------------
-  auto sheet_solid = new G4Box("TeflonSheetSolid", sac_size.x() / 2, teflon_thickness / 2, sac_size.z() / 2);
+  auto sheet_solid = new G4Box("TeflonSheetSolid", gel_size.x() / 2, gel_size.y() / 2, teflon_thickness / 2);
   auto sheet_lv = new G4LogicalVolume(sheet_solid, m_material_map["Teflon"], "TeflonSheetLV");
 
-  G4ThreeVector sheet_pos_top(0, sac_size.y() / 2 + teflon_thickness / 2, 0);
-  G4ThreeVector sheet_pos_bot(0, -sac_size.y() / 2 - teflon_thickness / 2, 0);
+  G4ThreeVector sheet_pos_top(0, 0, gel_size.z() / 2 + teflon_thickness / 2);
+  G4ThreeVector sheet_pos_bot(0, 0, -gel_size.z() / 2 - teflon_thickness / 2);
   new G4PVPlacement(nullptr, sheet_pos_top, sheet_lv, "TeflonSheetTopPV", mother_lv, false, 0, m_check_overlaps);
   new G4PVPlacement(nullptr, sheet_pos_bot, sheet_lv, "TeflonSheetBotPV", mother_lv, false, 1, m_check_overlaps);
   sheet_lv->SetVisAttributes(G4Colour::White());
 
   // ----------------------
-  // 上下 BlackSheet 追加
+  // BlackSheet
   // ----------------------
-  auto black_sheet_solid = new G4Box("BlackSheetSolid", sac_size.x() / 2, 0.1 * mm, sac_size.z() / 2);
+  auto black_sheet_solid = new G4Box("BlackSheetSolid", gel_size.x() / 2, gel_size.y() / 2, BlackSheet_thickness / 2);
   auto black_sheet_lv = new G4LogicalVolume(black_sheet_solid, m_material_map["BlackSheet"], "BlackSheetLV");
 
-  G4ThreeVector black_top_pos(0, sac_size.y() / 2 + teflon_thickness + 0.1 * mm, 0);
-  G4ThreeVector black_bot_pos(0, -sac_size.y() / 2 - teflon_thickness - 0.1 * mm, 0);
+  G4ThreeVector black_top_pos(0, 0, gel_size.z() / 2 + teflon_thickness + BlackSheet_thickness / 2);
+  G4ThreeVector black_bot_pos(0, 0, -gel_size.z() / 2 - teflon_thickness - BlackSheet_thickness / 2);
   new G4PVPlacement(nullptr, black_top_pos, black_sheet_lv, "BlackSheetTopPV", mother_lv, false, 0, m_check_overlaps);
   new G4PVPlacement(nullptr, black_bot_pos, black_sheet_lv, "BlackSheetBotPV", mother_lv, false, 1, m_check_overlaps);
-  black_sheet_lv->SetVisAttributes(G4Colour::Black());
+  black_sheet_lv->SetVisAttributes(G4Colour::Gray());
 
   // ----------------------
-  // 側面 Teflon フレーム (穴あき)
+  // Teflon Frame
   // ----------------------
-  auto frame_outer = new G4Box("FrameOuter", frame_thickness / 2, sac_size.y() / 2, sac_size.z() / 2);
-  G4SubtractionSolid *frame_with_holes = frame_outer;
+  auto frame_outer = new G4Box("FrameOuter", gel_size.x() / 2 + frame_thickness, gel_size.y() / 2 + frame_thickness, gel_size.z() / 2);
+  auto frame_inner = new G4Box("FrameInner", gel_size.x() / 2, gel_size.y() / 2, gel_size.z() / 2);
+  G4SubtractionSolid *frame = new G4SubtractionSolid("Frame", frame_outer, frame_inner);
 
-  for (int i = 0; i < 3; ++i)
-  {
-    double y_pos = (i - 1) * pmt_spacing;
-    auto hole = new G4Tubs("Hole", 0.0, pmt_radius + 0.5 * mm, sac_size.z() / 2 + 1.0 * mm, 0.0, 360.0 * deg);
-    auto trans = G4Transform3D(G4RotationMatrix(), G4ThreeVector(0, y_pos, 0));
-    frame_with_holes = new G4SubtractionSolid("FrameWithHoles", frame_with_holes, hole, trans);
-  }
+  // substract holes for PMTs
+  auto hole = new G4Tubs("hole", 0.0, pmt_casing_radius / 2, frame_thickness / 2, 0.0, 360.0 * deg);
 
-  auto frame_lv = new G4LogicalVolume(frame_with_holes, m_material_map["Teflon"], "TeflonFrameLV");
-
-  G4ThreeVector frame_pos_left(-sac_size.x() / 2 - frame_thickness / 2, 0, 0);
-  G4ThreeVector frame_pos_right(+sac_size.x() / 2 + frame_thickness / 2, 0, 0);
-  new G4PVPlacement(nullptr, frame_pos_left, frame_lv, "TeflonFrameLeftPV", mother_lv, false, 0, m_check_overlaps);
-  new G4PVPlacement(nullptr, frame_pos_right, frame_lv, "TeflonFrameRightPV", mother_lv, false, 1, m_check_overlaps);
-
-  // ----------------------
-  // PMT配置（14チャンネル）
-  // ----------------------
-  auto pmt_lv = SetupPMT();
-  G4RotationMatrix *rotX = new G4RotationMatrix();
+  auto rotX = new G4RotationMatrix();
   rotX->rotateX(90. * deg);
-  G4RotationMatrix *rotY = new G4RotationMatrix();
+  auto rotY = new G4RotationMatrix();
   rotY->rotateY(90. * deg);
 
-  // 短辺（左右）3chずつ
   for (int i = 0; i < 3; ++i)
   {
-    G4double dy = (i - 1) * pmt_spacing;
-    G4ThreeVector left_pos(-sac_size.x() / 2 - frame_thickness - pmt_thickness / 2, dy, 0);
-    G4ThreeVector right_pos(+sac_size.x() / 2 + frame_thickness + pmt_thickness / 2, dy, 0);
-    new G4PVPlacement(rotY, left_pos, pmt_lv, "PMTPV", mother_lv, false, i, m_check_overlaps);
-    new G4PVPlacement(rotY, right_pos, pmt_lv, "PMTPV", mother_lv, false, i + 3, m_check_overlaps);
+    double x_pos = (i - 1) * pmt_x_spacing;
+    auto upper_trans = G4Transform3D(*rotX, G4ThreeVector(x_pos, gel_size.y() / 2 + frame_thickness / 2, 0));
+    auto lower_trans = G4Transform3D(*rotX, G4ThreeVector(x_pos, -gel_size.y() / 2 - frame_thickness / 2, 0));
+    frame = new G4SubtractionSolid("Frame", frame, hole, upper_trans);
+    frame = new G4SubtractionSolid("Frame", frame, hole, lower_trans);
   }
 
-  // 長辺（上下）4chずつ
   for (int i = 0; i < 4; ++i)
   {
-    G4double dx = (i - 1.5) * pmt_spacing;
-    G4ThreeVector top_pos(dx, sac_size.y() / 2 + teflon_thickness + pmt_thickness / 2, 0);
-    G4ThreeVector bot_pos(dx, -sac_size.y() / 2 - teflon_thickness - pmt_thickness / 2, 0);
-    new G4PVPlacement(nullptr, top_pos, pmt_lv, "PMTPV", mother_lv, false, i + 6, m_check_overlaps);
-    new G4PVPlacement(nullptr, bot_pos, pmt_lv, "PMTPV", mother_lv, false, i + 10, m_check_overlaps);
+    double y_pos = (i - 1.5) * pmt_y_spacing;
+    auto left_trans = G4Transform3D(*rotY, G4ThreeVector(-gel_size.x() / 2 - frame_thickness / 2, y_pos, 0));
+    auto right_trans = G4Transform3D(*rotY, G4ThreeVector(gel_size.x() / 2 + frame_thickness / 2, y_pos, 0));
+    frame = new G4SubtractionSolid("Frame", frame, hole, left_trans);
+    frame = new G4SubtractionSolid("Frame", frame, hole, right_trans);
   }
+
+  auto frame_lv = new G4LogicalVolume(frame, m_material_map["Teflon"], "TeflonFrameLV");
+  new G4PVPlacement(nullptr, origin, frame_lv, "TeflonFrameBotPV", mother_lv, false, 0, m_check_overlaps);
+  frame_lv->SetVisAttributes(G4Colour::White());
+
+  // ----------------------
+  // PMT
+  // ----------------------
+  auto pmt_casing_solid = new G4Tubs("PMTCasingSolid", 0.0, pmt_casing_radius / 2, pmt_thickness / 2, 0.0, 360.0 * deg);
+  auto pmt_window_solid = new G4Tubs("PMTWindowSolid", 0.0, pmt_window_radius / 2, pmt_thickness / 2, 0.0, 360.0 * deg);
+
+  auto pmt_casing_lv = new G4LogicalVolume(pmt_casing_solid, m_material_map["POM"], "PMTCasingLV");
+  auto pmt_window_lv = new G4LogicalVolume(pmt_window_solid, m_material_map["Glass"], "PMTWindowLV");
+
+  pmt_window_lv->SetVisAttributes(G4VisAttributes(G4Colour::Yellow()));
+
+  for (int i = 0; i < 3; ++i)
+  {
+    double x_pos = (i - 1) * pmt_x_spacing;
+    new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2, 0), pmt_casing_lv, "PMTCasingUpper", mother_lv, false, i, m_check_overlaps);
+    new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2, 0), pmt_casing_lv, "PMTCasingLower", mother_lv, false, i + 3, m_check_overlaps);
+    new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2, 0), pmt_window_lv, "PMTWindowUpper", mother_lv, false, i, m_check_overlaps);
+    new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2, 0), pmt_window_lv, "PMTWindowLower", mother_lv, false, i + 3, m_check_overlaps);
+  }
+
+  for (int i = 0; i < 4; ++i)
+  {
+    double y_pos = (i - 1.5) * pmt_y_spacing;
+    new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2, y_pos, 0), pmt_casing_lv, "PMTCasingLeft", mother_lv, false, i, m_check_overlaps);
+    new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2, y_pos, 0), pmt_casing_lv, "PMTCasingRight", mother_lv, false, i + 4, m_check_overlaps);
+    new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2, y_pos, 0), pmt_window_lv, "PMTWindowLeft", mother_lv, false, i, m_check_overlaps);
+    new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2, y_pos, 0), pmt_window_lv, "PMTWindowRight", mother_lv, false, i + 4, m_check_overlaps);
+  }
+
+  // Set sensitive detector
+  auto pmt_sd = new PMTSD("PMT_SD");
+  G4SDManager::GetSDMpointer()->AddNewDetector(pmt_sd);
+  pmt_window_lv->SetSensitiveDetector(pmt_sd);
 }
 
 void DetectorConstruction::DumpMaterialProperties(G4Material *mat)
