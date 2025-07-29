@@ -8,19 +8,20 @@
 #include "G4PhysicalConstants.hh"
 #include "G4SDManager.hh"
 #include "G4TouchableHandle.hh"
-#include "MPPCSD.hh"
+#include "PMTSD.hh"
 
-SteppingAction::SteppingAction() {
+SteppingAction::SteppingAction()
+{
 }
 
 SteppingAction::~SteppingAction()
-{}
+{
+}
 
 // void SteppingAction::UserSteppingAction(const G4Step* step)
 // {
 // }
 
-
-void SteppingAction::UserSteppingAction(const G4Step* step)
+void SteppingAction::UserSteppingAction(const G4Step *step)
 {
 }

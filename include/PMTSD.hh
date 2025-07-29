@@ -27,7 +27,7 @@ private:
   G4double m_range_min;
   G4double m_range_max;
 
-  void InitializeQESpline();
+  void InitializeQESplines();
 };
 
 #endif

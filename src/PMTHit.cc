@@ -1,12 +1,12 @@
-#include "MPPCHit.hh"
+#include "PMTHit.hh"
 
 #include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
 #include "G4ios.hh"
 
-G4Allocator<MPPCHit> MPPCHitAllocator;
+G4Allocator<PMTHit> PMTHitAllocator;
 
-MPPCHit::MPPCHit()
+PMTHit::PMTHit()
     : fPosition(G4ThreeVector()),
       fWorldPosition(G4ThreeVector()),
       fTime(0.),
@@ -19,9 +19,10 @@ MPPCHit::MPPCHit()
 {
 }
 
-MPPCHit::~MPPCHit() {}
+PMTHit::~PMTHit() {}
 
-MPPCHit::MPPCHit(const MPPCHit& right) : G4VHit() {
+PMTHit::PMTHit(const PMTHit &right) : G4VHit()
+{
     fPosition = right.fPosition;
     fWorldPosition = right.fWorldPosition;
     fTime = right.fTime;
@@ -33,8 +34,9 @@ MPPCHit::MPPCHit(const MPPCHit& right) : G4VHit() {
     fDetectFlag = right.fDetectFlag;
 }
 
-void MPPCHit::Print() const {
-    G4cout << "MPPCHit: Position = " << fPosition
+void PMTHit::Print() const
+{
+    G4cout << "PMTHit: Position = " << fPosition
            << ", Time = " << G4BestUnit(fTime, "Time")
            << ", Energy = " << G4BestUnit(fEnergy, "Energy")
            << ", EventID = " << fEventID

@@ -1,23 +1,24 @@
-#ifndef MPPC_HIT_HH
-#define MPPC_HIT_HH
+#ifndef PMT_HIT_HH
+#define PMT_HIT_HH
 
 #include "G4VHit.hh"
 #include "G4ThreeVector.hh"
 #include "G4Allocator.hh"
 #include "G4THitsCollection.hh"
 
-class MPPCHit : public G4VHit {
+class PMTHit : public G4VHit
+{
 public:
-  MPPCHit();                         // Default constructor
-  virtual ~MPPCHit();                // Destructor
-  MPPCHit(const MPPCHit& right);     // Copy constructor
+  PMTHit();                    // Default constructor
+  virtual ~PMTHit();           // Destructor
+  PMTHit(const PMTHit &right); // Copy constructor
 
   // Set and get hit position (local coordinates)
-  void SetPosition(const G4ThreeVector& pos) { fPosition = pos; }
+  void SetPosition(const G4ThreeVector &pos) { fPosition = pos; }
   G4ThreeVector GetPosition() const { return fPosition; }
 
   // Set and get hit position (world coordinates)
-  void SetWorldPosition(const G4ThreeVector& pos) { fWorldPosition = pos; }
+  void SetWorldPosition(const G4ThreeVector &pos) { fWorldPosition = pos; }
   G4ThreeVector GetWorldPosition() const { return fWorldPosition; }
 
   // Set and get time of flight (ToF)
@@ -36,7 +37,7 @@ public:
   void SetParticleID(G4int pid) { fParticleID = pid; }
   G4int GetParticleID() const { return fParticleID; }
 
-  // Set and get MPPC copy number (which MPPC was hit)
+  // Set and get PMT copy number (which PMT was hit)
   void SetCopyNumber(G4int cn) { fCopyNumber = cn; }
   G4int GetCopyNumber() const { return fCopyNumber; }
 
@@ -47,22 +48,22 @@ public:
   // Set and get event ID
   void SetDetectFlag(G4int detectFlag) { fDetectFlag = detectFlag; }
   G4int GetDetectFlag() const { return fDetectFlag; }
-  
-  void Print() const;  // Print hit details
+
+  void Print() const; // Print hit details
 
 private:
-  G4ThreeVector fPosition;       // Local position of the hit
-  G4ThreeVector fWorldPosition;  // World position of the hit
-  G4double fTime;                // Time of flight (ToF)
-  G4double fEnergy;              // Photon energy
-  G4double fWaveLength;          // wave length
-  G4int fParticleID;             // Particle ID
-  G4int fCopyNumber;             // MPPC copy number
-  G4int fEventID;                // Event ID
-  G4int fDetectFlag;             // detect flag
+  G4ThreeVector fPosition;      // Local position of the hit
+  G4ThreeVector fWorldPosition; // World position of the hit
+  G4double fTime;               // Time of flight (ToF)
+  G4double fEnergy;             // Photon energy
+  G4double fWaveLength;         // wave length
+  G4int fParticleID;            // Particle ID
+  G4int fCopyNumber;            // PMT copy number
+  G4int fEventID;               // Event ID
+  G4int fDetectFlag;            // detect flag
 };
 
-// Memory allocator for MPPCHit objects
-extern G4Allocator<MPPCHit> MPPCHitAllocator;
+// Memory allocator for PMTHit objects
+extern G4Allocator<PMTHit> PMTHitAllocator;
 
 #endif

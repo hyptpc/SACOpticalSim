@@ -240,6 +240,9 @@ void DetectorConstruction::AddOpticalProperties()
   using CLHEP::m;
   using CLHEP::mm;
 
+  std::vector<G4double> photon_energy, refractive_index, absorption_length;
+  G4int n_entries;
+
   // +---------+
   // | Aerogel |
   // +---------+
