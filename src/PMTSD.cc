@@ -19,7 +19,7 @@ PMTSD::PMTSD(const G4String &name)
       m_qe_spline(nullptr),
       m_trans_spline(nullptr)
 {
-  collectionName.insert("PMTCollection");
+  collectionName.insert("PmtCollection");
   InitializeQESplines();
 }
 

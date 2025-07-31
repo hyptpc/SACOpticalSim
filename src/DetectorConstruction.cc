@@ -26,7 +26,8 @@ namespace
 
 //_____________________________________________________________________________
 DetectorConstruction::DetectorConstruction()
-    : G4VUserDetectorConstruction(), m_check_overlaps(true)
+    // : G4VUserDetectorConstruction(), m_check_overlaps(true) //debug
+    : G4VUserDetectorConstruction(), m_check_overlaps(false)
 {
 }
 
@@ -360,7 +361,7 @@ void DetectorConstruction::ConstructSAC()
   auto gel_solid = new G4Box("GelSolid", gel_size.x() / 2, gel_size.y() / 2, gel_size.z() / 2);
   auto gel_lv = new G4LogicalVolume(gel_solid, m_material_map["Aerogel"], "GelLV");
   new G4PVPlacement(nullptr, origin, gel_lv, "GelPV", mother_lv, false, 0, m_check_overlaps);
-  gel_lv->SetVisAttributes(G4Colour::Cyan());
+  gel_lv->SetVisAttributes(G4Colour::White());
 
   // ----------------------
   // Teflon Sheet
@@ -432,7 +433,7 @@ void DetectorConstruction::ConstructSAC()
 
     for (int i = 0; i < 4; ++i)
     {
-      double y_pos = (i - 1.5) * pmt_y_spacing;
+      double y_pos = (1.5 - i) * pmt_y_spacing;
       auto left_trans = G4Transform3D(*rotY, G4ThreeVector(-gel_size.x() / 2 - frame_thickness / 2, y_pos, 0));
       auto right_trans = G4Transform3D(*rotY, G4ThreeVector(gel_size.x() / 2 + frame_thickness / 2, y_pos, 0));
       frame = new G4SubtractionSolid("Frame", frame, hole, left_trans);
