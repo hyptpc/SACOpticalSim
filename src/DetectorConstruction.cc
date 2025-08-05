@@ -24,19 +24,18 @@ namespace
   auto &gConfMan = ConfManager::GetInstance();
 }
 
-//_____________________________________________________________________________
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 DetectorConstruction::DetectorConstruction()
-    // : G4VUserDetectorConstruction(), m_check_overlaps(true) //debug
-    : G4VUserDetectorConstruction(), m_check_overlaps(false)
+    : G4VUserDetectorConstruction(), m_check_overlaps(true)
 {
 }
 
-//_____________________________________________________________________________
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 DetectorConstruction::~DetectorConstruction()
 {
 }
 
-//_____________________________________________________________________________
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 G4VPhysicalVolume *
 DetectorConstruction::Construct()
 {
@@ -58,7 +57,7 @@ DetectorConstruction::Construct()
   return world_pv;
 }
 
-//_____________________________________________________________________________
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void DetectorConstruction::ConstructElements()
 {
   using CLHEP::g;
@@ -110,7 +109,7 @@ void DetectorConstruction::ConstructElements()
                                       A = 39.093 * g / mole);
 }
 
-//_____________________________________________________________________________
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void DetectorConstruction::ConstructMaterials()
 {
   using CLHEP::cm3;
@@ -234,27 +233,54 @@ void DetectorConstruction::ConstructMaterials()
   m_material_map[name]->AddMaterial(m_material_map["Al2O3"], massfraction = 0.024);
 }
 
-//_____________________________________________________________________________
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void DetectorConstruction::AddOpticalProperties()
+
 {
   using CLHEP::eV;
   using CLHEP::m;
   using CLHEP::mm;
+  using CLHEP::um;
 
   std::vector<G4double> photon_energy, refractive_index, absorption_length;
   G4int n_entries;
 
-  // +---------+
-  // | Aerogel |
-  // +---------+
+  // +-------------------------------------------------------------------------+
+  // | Aerogel                                                                 |
+  // | Ref: Hasegawa master thesis                                             |
+  // | from web site http://refractiveindex.info/?group=CRYSTALS&material=SiO2 |
+  // | source of the information on quartz seems to be Gorachand Ghosh,        |
+  // | Dispersion-equation coefficients for the refractive index and           |
+  // | birefringence of calcite and quartz crystals, Opt. Commun. 163,         |
+  // | 95-102 (1999) doi:10.1016/S0030-4018(99)00091-7.                        |
+  // |                                                                         |
+  // | Translation (of density difference) from quartz (SiO2) to silicai       |
+  // | aerogel was made by the equation:                                       |
+  // | n(aerogel) = 1 + (n(SiO2)-1)*rho(aerogel)/rho(SiO2)                     |
+  // +-------------------------------------------------------------------------+
   auto aerogel_prop = new G4MaterialPropertiesTable();
-  photon_energy = {1.3 * eV, 7.0 * eV};
-  refractive_index = {1.05, 1.05};
+
+  photon_energy = {1.93 * eV, 1.99 * eV, 2.06 * eV, 2.13 * eV, 2.21 * eV,
+                   2.29 * eV, 2.38 * eV, 2.47 * eV, 2.57 * eV, 2.69 * eV,
+                   2.81 * eV, 2.94 * eV, 3.09 * eV, 3.25 * eV, 3.43 * eV,
+                   3.64 * eV, 3.86 * eV, 4.12 * eV, 4.42 * eV, 4.76 * eV,
+                   5.15 * eV, 5.62 * eV, 6.18 * eV, 6.98 * eV, 7.73 * eV};
+
+  refractive_index = {1.049, 1.049, 1.049, 1.049, 1.050,
+                      1.050, 1.050, 1.050, 1.050, 1.050,
+                      1.050, 1.050, 1.051, 1.051, 1.051,
+                      1.052, 1.052, 1.053, 1.053, 1.054,
+                      1.055, 1.057, 1.059, 1.062, 1.068};
+
+  absorption_length = {1.1750 * m, 1.1750 * m, 1.1750 * m, 1.0820 * m, 0.9704 * m,
+                       0.8584 * m, 0.7592 * m, 0.6808 * m, 0.6022 * m, 0.5044 * m,
+                       0.4224 * m, 0.3636 * m, 0.2884 * m, 0.2350 * m, 0.1916 * m,
+                       0.1499 * m, 0.1173 * m, 0.0892 * m, 0.0698 * m, 0.0546 * m,
+                       0.0439 * m, 0.0335 * m, 0.0269 * m, 0.0269 * m, 0.0269 * m};
+
   n_entries = photon_energy.size();
   aerogel_prop->AddProperty("RINDEX", &photon_energy[0], &refractive_index[0], n_entries);
-  // for absorption_length
-  photon_energy = {1.3 * eV, 1.56 * eV, 1.68 * eV, 1.84 * eV, 2.06 * eV, 2.26 * eV, 2.54 * eV, 2.90 * eV, 3.10 * eV, 3.28 * eV, 3.94 * eV, 4.94 * eV, 7.0 * eV};
-  absorption_length = {500 * mm, 128 * mm, 120 * mm, 97 * mm, 77 * mm, 59 * mm, 41 * mm, 26 * mm, 20 * mm, 17 * mm, 8 * mm, 4 * mm, 1 * mm};
+
   n_entries = photon_energy.size();
   aerogel_prop->AddProperty("ABSLENGTH", &photon_energy[0], &absorption_length[0], n_entries);
   m_material_map["Aerogel"]->SetMaterialPropertiesTable(aerogel_prop);
@@ -269,63 +295,124 @@ void DetectorConstruction::AddOpticalProperties()
   air_prop->AddProperty("RINDEX", &photon_energy[0], &refractive_index[0], n_entries);
   m_material_map["Air"]->SetMaterialPropertiesTable(air_prop);
 
-  // +----------------------+
-  // | Black sheet Property |
-  // +----------------------+
+  // +----------------------------------------------------------+
+  // | Black sheet Property                                     |
+  // | absorption length is set as a rough value just to ensure |
+  // | that optical photon doesn't come out from the aerogel    |
+  // +----------------------------------------------------------+
   auto blacksheet_prop = new G4MaterialPropertiesTable();
   photon_energy = {1.3 * eV, 7.0 * eV};
   refractive_index = {1.6, 1.6};
-  absorption_length = {1.0e-11 * m, 1.0e-11 * m};
+  absorption_length = {1. * um, 1. * um};
   n_entries = photon_energy.size();
   blacksheet_prop->AddProperty("RINDEX", &photon_energy[0], &refractive_index[0], n_entries);
   blacksheet_prop->AddProperty("ABSLENGTH", &photon_energy[0], &absorption_length[0], n_entries);
   m_material_map["BlackSheet"]->SetMaterialPropertiesTable(blacksheet_prop);
 
-  // +-----------------+
-  // | Teflon Property |
-  // +-----------------+
+  // +----------------------------------------------------------+
+  // | Teflon Property                                          |
+  // | Ref: https://ieeexplore.ieee.org/document/5411657        |
+  // | absorption length is set as a rough value just to ensure |
+  // | that optical photon doesn't come out from the aerogel    |
+  // +----------------------------------------------------------+
   auto teflon_prop = new G4MaterialPropertiesTable();
-  photon_energy = {1.3 * eV, 7.0 * eV};
-  refractive_index = {1.35, 1.35};
-  absorption_length = {1.0e-11 * m, 1.0e-11 * m};
+
+  photon_energy = {1.84 * eV, 1.92 * eV, 2.01 * eV, 2.11 * eV, 2.22 * eV,
+                   2.33 * eV, 2.47 * eV, 2.61 * eV, 2.78 * eV, 2.97 * eV,
+                   3.19 * eV, 3.43 * eV, 3.72 * eV, 4.07 * eV, 4.48 * eV,
+                   5.01 * eV, 5.57 * eV, 6.06 * eV, 6.48 * eV, 6.72 * eV,
+                   7.15 * eV, 7.45 * eV, 7.59 * eV, 7.73 * eV, 7.83 * eV};
+
+  refractive_index = {1.349, 1.349, 1.349, 1.349, 1.350,
+                      1.350, 1.351, 1.352, 1.353, 1.354,
+                      1.356, 1.358, 1.361, 1.365, 1.370,
+                      1.379, 1.394, 1.411, 1.432, 1.449,
+                      1.528, 1.652, 1.788, 1.673, 1.521};
+
+  absorption_length = {1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
+                       1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
+                       1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
+                       1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
+                       1. * um, 1. * um, 1. * um, 1. * um, 1. * um};
+
   n_entries = photon_energy.size();
   teflon_prop->AddProperty("RINDEX", &photon_energy[0], &refractive_index[0], n_entries);
   teflon_prop->AddProperty("ABSLENGTH", &photon_energy[0], &absorption_length[0], n_entries);
   m_material_map["Teflon"]->SetMaterialPropertiesTable(teflon_prop);
 
-  // +-----------------------------+
-  // | PMT window (Glass) Property |
-  // +-----------------------------+
+  // +-----------------------------------------------------------------+
+  // | PMT window (Glass) Property                                     |
+  // | Ref: https://refractiveindex.info/?shelf=3d&book=glass&page=BK7 |
+  // +-----------------------------------------------------------------+
   auto pmt_prop = new G4MaterialPropertiesTable();
-  photon_energy = {1.3 * eV, 7.0 * eV};
-  refractive_index = {1.52, 1.52};
-  // absorption_length = {1.0 * cm, 1.0 * cm};
+
+  photon_energy = {
+      1.76 * eV, 1.82 * eV, 1.87 * eV, 1.93 * eV, 1.99 * eV,
+      2.06 * eV, 2.13 * eV, 2.21 * eV, 2.29 * eV, 2.38 * eV,
+      2.47 * eV, 2.57 * eV, 2.69 * eV, 2.81 * eV, 2.94 * eV,
+      3.09 * eV, 3.25 * eV, 3.43 * eV, 3.64 * eV, 3.86 * eV,
+      4.12 * eV};
+
+  refractive_index = {
+      1.513, 1.514, 1.514, 1.515, 1.516,
+      1.516, 1.517, 1.518, 1.519, 1.520,
+      1.521, 1.523, 1.524, 1.526, 1.528,
+      1.531, 1.534, 1.537, 1.541, 1.546,
+      1.553};
+
+  absorption_length = {
+      6.24 * m, 5.02 * m, 4.15 * m, 4.15 * m, 4.15 * m,
+      4.52 * m, 4.99 * m, 5.64 * m, 5.88 * m, 4.90 * m,
+      4.15 * m, 3.85 * m, 3.56 * m, 3.18 * m, 3.56 * m,
+      3.11 * m, 1.46 * m, 5.33e-1 * m, 1.35e-1 * m, 3.82e-2 * m,
+      8.35e-3 * m};
+
   n_entries = photon_energy.size();
   pmt_prop->AddProperty("RINDEX", &photon_energy[0], &refractive_index[0], n_entries);
-  // pmt_prop->AddProperty("ABSLENGTH", &photon_energy[0], &absorption_length[0], n_entries);
+  pmt_prop->AddProperty("ABSLENGTH", &photon_energy[0], &absorption_length[0], n_entries);
   m_material_map["Glass"]->SetMaterialPropertiesTable(pmt_prop);
 
-  // +----------------------------+
-  // | PMT casing (POM) Property |
-  // +----------------------------+
+  // +------------------------------------------------------------------------------+
+  // | PMT casing (POM) Property                                                    |
+  // | Ref: https://www.sciencedirect.com/science/article/abs/pii/S1350449523003687 |
+  // +------------------------------------------------------------------------------+
   auto pom_prop = new G4MaterialPropertiesTable();
-  photon_energy = {1.3 * eV, 7.0 * eV};
-  refractive_index = {1.48, 1.48};            // 一般的なPOMの屈折率
-  absorption_length = {0.01 * mm, 0.01 * mm}; // 完全遮光に近い設定
-  pom_prop->AddProperty("RINDEX", &photon_energy[0], &refractive_index[0], 2);
-  pom_prop->AddProperty("ABSLENGTH", &photon_energy[0], &absorption_length[0], 2);
+
+  photon_energy = {1.79 * eV, 1.87 * eV, 1.96 * eV, 2.06 * eV, 2.17 * eV,
+                   2.29 * eV, 2.43 * eV, 2.58 * eV, 2.75 * eV, 2.95 * eV,
+                   3.18 * eV, 3.44 * eV, 3.77 * eV, 4.15 * eV, 4.61 * eV,
+                   5.20 * eV, 5.97 * eV};
+
+  refractive_index = {1.480, 1.480, 1.480, 1.480, 1.480,
+                      1.481, 1.481, 1.482, 1.482, 1.482,
+                      1.484, 1.485, 1.488, 1.492, 1.497,
+                      1.509, 1.535};
+
+  n_entries = photon_energy.size();
+  pom_prop->AddProperty("RINDEX", &photon_energy[0], &refractive_index[0], n_entries);
+
+  photon_energy = {1.79 * eV, 1.87 * eV, 1.97 * eV, 2.06 * eV, 2.17 * eV,
+                   2.29 * eV, 2.43 * eV, 2.59 * eV, 2.76 * eV, 2.94 * eV,
+                   3.18 * eV, 3.44 * eV, 3.78 * eV, 4.15 * eV, 4.61 * eV,
+                   5.20 * eV, 5.89 * eV};
+
+  absorption_length = {36.358 * nm, 34.729 * nm, 33.021 * nm, 31.504 * nm, 29.907 * nm,
+                       28.293 * nm, 26.683 * nm, 24.989 * nm, 23.386 * nm, 21.959 * nm,
+                       20.312 * nm, 18.733 * nm, 17.041 * nm, 15.519 * nm, 13.939 * nm,
+                       12.362 * nm, 10.872 * nm};
+
+  n_entries = photon_energy.size();
+  pom_prop->AddProperty("ABSLENGTH", &photon_energy[0], &absorption_length[0], n_entries);
   m_material_map["POM"]->SetMaterialPropertiesTable(pom_prop);
 }
 
-//_____________________________________________________________________________
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 void DetectorConstruction::ConstructSAC()
 {
   using CLHEP::deg;
   using CLHEP::mm;
 
-  // ----------------------
-  // パラメータ定義
-  // ----------------------
   const G4ThreeVector gel_size(
       gConfMan.GetDouble("gel_size_x") * mm,
       gConfMan.GetDouble("gel_size_y") * mm,
@@ -446,9 +533,9 @@ void DetectorConstruction::ConstructSAC()
   frame_lv->SetVisAttributes(G4Colour::White());
 
   // ----------------------
-  // PMT
+  // PMT (Window and Casing)
   // ----------------------
-  auto pmt_casing_solid = new G4Tubs("PMTCasingSolid", 0.0, pmt_casing_radius / 2, pmt_thickness / 2, 0.0, 360.0 * deg);
+  auto pmt_casing_solid = new G4Tubs("PMTCasingSolid", pmt_window_radius / 2, pmt_casing_radius / 2, pmt_thickness / 2, 0.0, 360.0 * deg);
   auto pmt_window_solid = new G4Tubs("PMTWindowSolid", 0.0, pmt_window_radius / 2, pmt_thickness / 2, 0.0, 360.0 * deg);
 
   auto pmt_casing_lv = new G4LogicalVolume(pmt_casing_solid, m_material_map["POM"], "PMTCasingLV");
@@ -462,17 +549,17 @@ void DetectorConstruction::ConstructSAC()
     for (int i = 0; i < 3; ++i)
     {
       double x_pos = (i - 1) * pmt_x_spacing;
-      new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, i, m_check_overlaps);      // upper casing
-      new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, i + 3, m_check_overlaps); // lower casing
-      new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2, 0), pmt_window_lv, "PMTWindow", mother_lv, false, i, m_check_overlaps);      // upper window
-      new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2, 0), pmt_window_lv, "PMTWindow", mother_lv, false, i + 3, m_check_overlaps); // lower window
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2 + pmt_thickness / 2, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, i, m_check_overlaps);      // upper casing
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2 - pmt_thickness / 2, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, i + 3, m_check_overlaps); // lower casing
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2 + pmt_thickness / 2, 0), pmt_window_lv, "PMTWindow", mother_lv, false, i, m_check_overlaps);      // upper window
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2 - pmt_thickness / 2, 0), pmt_window_lv, "PMTWindow", mother_lv, false, i + 3, m_check_overlaps); // lower window
     }
 
     double y_pos = 0;
-    new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2, y_pos, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, 6, m_check_overlaps); // left casing
-    new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2, y_pos, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, 7, m_check_overlaps);  // right casing
-    new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2, y_pos, 0), pmt_window_lv, "PMTWindow", mother_lv, false, 6, m_check_overlaps); // left window
-    new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2, y_pos, 0), pmt_window_lv, "PMTWindow", mother_lv, false, 7, m_check_overlaps);  // right window
+    new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2 - pmt_thickness / 2, y_pos, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, 6, m_check_overlaps); // left casing
+    new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2 + pmt_thickness / 2, y_pos, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, 7, m_check_overlaps);  // right casing
+    new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2 - pmt_thickness / 2, y_pos, 0), pmt_window_lv, "PMTWindow", mother_lv, false, 6, m_check_overlaps); // left window
+    new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2 + pmt_thickness / 2, y_pos, 0), pmt_window_lv, "PMTWindow", mother_lv, false, 7, m_check_overlaps);  // right window
   }
 
   // new SAC
@@ -481,19 +568,19 @@ void DetectorConstruction::ConstructSAC()
     for (int i = 0; i < 3; ++i)
     {
       double x_pos = (i - 1) * pmt_x_spacing;
-      new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, i, m_check_overlaps);      // upper casing
-      new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, i + 3, m_check_overlaps); // lower casing
-      new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2, 0), pmt_window_lv, "PMTWindow", mother_lv, false, i, m_check_overlaps);      // upper window
-      new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2, 0), pmt_window_lv, "PMTWindow", mother_lv, false, i + 3, m_check_overlaps); // lower window
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2 + pmt_thickness / 2, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, i, m_check_overlaps);      // upper casing
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2 - pmt_thickness / 2, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, i + 3, m_check_overlaps); // lower casing
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, gel_size.y() / 2 + pmt_thickness / 2, 0), pmt_window_lv, "PMTWindow", mother_lv, false, i, m_check_overlaps);      // upper window
+      new G4PVPlacement(rotX, G4ThreeVector(x_pos, -gel_size.y() / 2 - pmt_thickness / 2, 0), pmt_window_lv, "PMTWindow", mother_lv, false, i + 3, m_check_overlaps); // lower window
     }
 
     for (int i = 0; i < 4; ++i)
     {
       double y_pos = (1.5 - i) * pmt_y_spacing;
-      new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2, y_pos, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, i + 6, m_check_overlaps); // left casing
-      new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2, y_pos, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, i + 10, m_check_overlaps); // right casing
-      new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2, y_pos, 0), pmt_window_lv, "PMTWindow", mother_lv, false, i + 6, m_check_overlaps); // left window
-      new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2, y_pos, 0), pmt_window_lv, "PMTWindow", mother_lv, false, i + 10, m_check_overlaps); // right window
+      new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2 - pmt_thickness / 2, y_pos, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, i + 6, m_check_overlaps); // left casing
+      new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2 + pmt_thickness / 2, y_pos, 0), pmt_casing_lv, "PMTCasing", mother_lv, false, i + 10, m_check_overlaps); // right casing
+      new G4PVPlacement(rotY, G4ThreeVector(-gel_size.x() / 2 - pmt_thickness / 2, y_pos, 0), pmt_window_lv, "PMTWindow", mother_lv, false, i + 6, m_check_overlaps); // left window
+      new G4PVPlacement(rotY, G4ThreeVector(gel_size.x() / 2 + pmt_thickness / 2, y_pos, 0), pmt_window_lv, "PMTWindow", mother_lv, false, i + 10, m_check_overlaps); // right window
     }
   }
 
@@ -503,6 +590,7 @@ void DetectorConstruction::ConstructSAC()
   pmt_window_lv->SetSensitiveDetector(pmt_sd);
 }
 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void DetectorConstruction::DumpMaterialProperties(G4Material *mat)
 {
   G4cout << "=== Material: " << mat->GetName() << " ===" << G4endl;
