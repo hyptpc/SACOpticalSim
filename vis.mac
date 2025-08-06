@@ -36,7 +36,7 @@
 /vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
 /vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2
 
-# Show hits (e.g., MPPC hits)
+# Show hits (e.g., PMT hits)
 /vis/scene/add/hits
 
 # Accumulate events (superimpose all events in a run)
@@ -50,4 +50,4 @@
 #/vis/viewer/flush
 
 # Beam on
-/run/beamOn 1
+/run/beamOn 10

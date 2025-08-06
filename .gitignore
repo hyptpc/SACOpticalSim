@@ -1,2 +1,6 @@
 /build/
 *.root
+
+# local PC settings
+/.vscode/
+/.envrc/
