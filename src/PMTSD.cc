@@ -42,9 +42,11 @@ G4bool PMTSD::ProcessHits(G4Step *aStep, G4TouchableHistory *)
   const auto preStepPoint = aStep->GetPreStepPoint();
   const auto aTrack = aStep->GetTrack();
 
-  // Optical photon check
-  if (aTrack->GetDefinition() != G4OpticalPhoton::OpticalPhotonDefinition())
+  // Collect only Cherenkov photons
+  if (aTrack->GetDefinition() != G4OpticalPhoton::Definition())
+  {
     return false;
+  }
 
   // Energy
   G4double energy = aTrack->GetKineticEnergy(); // exclude rest mass
@@ -115,6 +117,7 @@ void PMTSD::InitializeQESplines()
       3.8400 * eV, 3.9000 * eV, 3.9300 * eV, 3.9900 * eV, 4.0200 * eV,
       4.0800 * eV, 4.1100 * eV, 4.1700 * eV, 4.2300 * eV, 4.2600 * eV,
       4.3200 * eV, 4.3500 * eV, 4.4100 * eV};
+
   std::vector<double> QE = {
       0.0007, 0.0017, 0.0024, 0.0057, 0.0081, 0.0106, 0.0156, 0.0205, 0.0253, 0.0358,
       0.0431, 0.0505, 0.0578, 0.0745, 0.0838, 0.0912, 0.0985, 0.1071, 0.1243, 0.1329,
@@ -135,6 +138,7 @@ void PMTSD::InitializeQESplines()
       4.2162 * eV, 4.2669 * eV, 4.3177 * eV, 4.3685 * eV, 4.4192 * eV,
       4.4700 * eV, 4.5208 * eV, 4.5715 * eV, 4.6223 * eV, 4.6731 * eV,
       4.6985 * eV};
+
   std::vector<double> Trans = {
       0.9950, 0.9441, 0.9333, 0.9226, 0.9120, 0.8915, 0.8710, 0.8611, 0.8511, 0.8415,
       0.8318, 0.8130, 0.7943, 0.7678, 0.7413, 0.7246, 0.7079, 0.6843, 0.6607, 0.6316,

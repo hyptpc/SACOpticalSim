@@ -20,6 +20,7 @@ private:
   std::map<G4String, G4Material *> m_material_map;
   G4LogicalVolume *m_world_lv;
   G4bool m_check_overlaps;
+  G4OpticalSurface *gel_teflon_surf, *blacksheet_surf;
 
 private:
   virtual G4VPhysicalVolume *Construct();

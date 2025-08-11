@@ -41,7 +41,7 @@ StackingAction::ClassifyNewTrack(const G4Track *aTrack)
         ++fCerenkovAll;
 
         const G4VPhysicalVolume *volume = aTrack->GetVolume();
-        if (volume->GetName() == "SacPV")
+        if (volume->GetName() == "GelPV")
           ++fCerenkovAerogel;
 
         // if (volume) {

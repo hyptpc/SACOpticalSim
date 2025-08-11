@@ -48,6 +48,3 @@
 
 # Flush viewer for file-based drivers (optional)
 #/vis/viewer/flush
-
-# Beam on
-/run/beamOn 10
