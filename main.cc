@@ -3,7 +3,6 @@
 #include "AnaManager.hh"
 #include "RunAction.hh"
 #include "ConfManager.hh"
-    
 #include "FTFP_BERT.hh"
 #include "QGSP_BERT.hh"
 #include "G4EmStandardPhysics_option4.hh"
@@ -15,34 +14,35 @@
 #include "G4VisExecutive.hh"
 #include "G4Cerenkov.hh"
 #include "G4DecayPhysics.hh"
-
 #include <random>
 
 namespace
 {
-  auto& gAnaMan  = AnaManager::GetInstance();
-  auto& gConfMan = ConfManager::GetInstance();
+  auto &gAnaMan = AnaManager::GetInstance();
+  auto &gConfMan = ConfManager::GetInstance();
   void PrintUsage()
   {
     G4cerr << " Usage: " << G4endl
-	   << " KVCOpticalSim <conf file> <output rootfile name> [macro]"
+           << " KVCOpticalSim <conf file> <output rootfile name> [macro]"
            << G4endl;
   }
-}  // namespace
+} // namespace
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-  if (argc < 3 || argc > 4) {
+  if (argc < 3 || argc > 4)
+  {
     PrintUsage();
     return 1;
   }
-  gConfMan.LoadConfigFile(argv[1]); 
+  gConfMan.LoadConfigFile(argv[1]);
   gAnaMan.SetOutputRootfilePath(argv[2]);
-  
-  G4String macro;
-  if (argc == 4) macro = argv[3];
 
-  G4UIExecutive* ui = nullptr;
+  G4String macro;
+  if (argc == 4)
+    macro = argv[3];
+
+  G4UIExecutive *ui = nullptr;
   if (macro.empty())
   {
     ui = new G4UIExecutive(argc, argv);
@@ -57,11 +57,12 @@ int main(int argc, char** argv)
 
   // Physics List setting
   // G4VModularPhysicsList* physicsList = new FTFP_BERT;
-  G4VModularPhysicsList* physicsList = new QGSP_BERT;
+  G4VModularPhysicsList *physicsList = new QGSP_BERT;
   physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
   auto opticalPhysics = new G4OpticalPhysics();
   physicsList->RegisterPhysics(opticalPhysics);
-  if (gConfMan.GetInt("decay") == 1) physicsList->RegisterPhysics(new G4DecayPhysics());
+  if (gConfMan.GetInt("decay") == 1)
+    physicsList->RegisterPhysics(new G4DecayPhysics());
   runManager->SetUserInitialization(physicsList);
 
   // G4Cerenkov setting
@@ -72,16 +73,14 @@ int main(int argc, char** argv)
   optical_params->SetCerenkovVerboseLevel(1);
   optical_params->SetBoundaryVerboseLevel(1);
   optical_params->SetAbsorptionVerboseLevel(1);
-    
+
   runManager->SetUserInitialization(new ActionInitialization());
   runManager->Initialize();
 
-  
-  G4VisManager* visManager = new G4VisExecutive("Quiet");
+  G4VisManager *visManager = new G4VisExecutive("Quiet");
   visManager->Initialize();
 
-  G4UImanager* UImanager = G4UImanager::GetUIpointer();
-
+  G4UImanager *UImanager = G4UImanager::GetUIpointer();
 
   if (!macro.empty())
   {

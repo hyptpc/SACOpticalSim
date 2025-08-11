@@ -313,7 +313,8 @@ void DetectorConstruction::AddOpticalProperties()
   // | Teflon Property                                                      |
   // | Ref: https://ieeexplore.ieee.org/document/5411657                    |
   // | Ref: https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=13871 |
-  // | absorption length is just set as a rough value                       |
+  // | absorption length is set to a small value to ensure it doesn't       |
+  // | emmit cherenkov light inside                                         |
   // +----------------------------------------------------------------------+
   auto teflon_prop = new G4MaterialPropertiesTable();
 
@@ -323,17 +324,17 @@ void DetectorConstruction::AddOpticalProperties()
                    5.01 * eV, 5.57 * eV, 6.06 * eV, 6.48 * eV, 6.72 * eV,
                    7.15 * eV, 7.45 * eV, 7.59 * eV, 7.73 * eV, 7.83 * eV};
 
-  refractive_index = {1.349, 1.349, 1.349, 1.349, 1.350,
-                      1.350, 1.351, 1.352, 1.353, 1.354,
-                      1.356, 1.358, 1.361, 1.365, 1.370,
-                      1.379, 1.394, 1.411, 1.432, 1.449,
-                      1.528, 1.652, 1.788, 1.673, 1.521};
+  // refractive_index = {1.349, 1.349, 1.349, 1.349, 1.350,
+  //                     1.350, 1.351, 1.352, 1.353, 1.354,
+  //                     1.356, 1.358, 1.361, 1.365, 1.370,
+  //                     1.379, 1.394, 1.411, 1.432, 1.449,
+  //                     1.528, 1.652, 1.788, 1.673, 1.521};
 
-  absorption_length = {1. * m, 1. * m, 1. * m, 1. * m, 1. * m,
-                       1. * m, 1. * m, 1. * m, 1. * m, 1. * m,
-                       1. * m, 1. * m, 1. * m, 1. * m, 1. * m,
-                       1. * m, 1. * m, 1. * m, 1. * m, 1. * m,
-                       1. * m, 1. * m, 1. * m, 1. * m, 1. * m};
+  absorption_length = {1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
+                       1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
+                       1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
+                       1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
+                       1. * um, 1. * um, 1. * um, 1. * um, 1. * um};
 
   reflectivity = {0.92, 0.92, 0.93, 0.93, 0.93,
                   0.93, 0.93, 0.93, 0.93, 0.93,
@@ -342,16 +343,18 @@ void DetectorConstruction::AddOpticalProperties()
                   0.93, 0.93, 0.93, 0.93, 0.93}; // rough estimation
 
   n_entries = photon_energy.size();
-  teflon_prop->AddProperty("RINDEX", &photon_energy[0], &refractive_index[0], n_entries);
+  // teflon_prop->AddProperty("RINDEX", &photon_energy[0], &refractive_index[0], n_entries);
   teflon_prop->AddProperty("ABSLENGTH", &photon_energy[0], &absorption_length[0], n_entries);
   m_material_map["Teflon"]->SetMaterialPropertiesTable(teflon_prop);
 
   // Optical surface settings: Aerogel ↔ Teflon (diffuse high reflectance)
   auto gel_teflon_prop = new G4MaterialPropertiesTable();
   gel_teflon_prop->AddProperty("REFLECTIVITY", &photon_energy[0], &reflectivity[0], n_entries);
+  gel_teflon_surf = new G4OpticalSurface("GelTeflonSurface");
   gel_teflon_surf->SetType(dielectric_dielectric);
   gel_teflon_surf->SetModel(unified);
-  gel_teflon_surf->SetFinish(groundbackpainted);
+  gel_teflon_surf->SetFinish(groundfrontpainted);
+  // gel_teflon_surf->SetFinish(groundbackpainted);
   gel_teflon_surf->SetSigmaAlpha(0.25); // roughness (tune 0.1–0.3)
   gel_teflon_surf->SetMaterialPropertiesTable(gel_teflon_prop);
 
@@ -460,7 +463,7 @@ void DetectorConstruction::ConstructSAC()
   auto gel_solid = new G4Box("GelSolid", gel_size.x() / 2, gel_size.y() / 2, gel_size.z() / 2);
   auto gel_lv = new G4LogicalVolume(gel_solid, m_material_map["Aerogel"], "GelLV");
   auto gel_pv = new G4PVPlacement(nullptr, origin, gel_lv, "GelPV", mother_lv, false, 0, m_check_overlaps);
-  gel_lv->SetVisAttributes(G4Colour::White());
+  // gel_lv->SetVisAttributes(G4Colour::Cyan());
 
   // ----------------------
   // Teflon Sheet
@@ -617,7 +620,7 @@ void DetectorConstruction::DumpMaterialProperties(G4Material *mat)
     return;
   }
 
-  std::vector<G4String> propertyNames = {"RINDEX", "ABSORPTION", "REFLECTIVITY"};
+  std::vector<G4String> propertyNames = {"RINDEX", "ABSLENGTH", "REFLECTIVITY"};
 
   for (const auto &prop : propertyNames)
   {
