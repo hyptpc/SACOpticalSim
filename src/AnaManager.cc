@@ -70,7 +70,6 @@ void AnaManager::BeginOfRunAction(const G4Run *)
 
   // -- PMT -----
   m_tree->Branch("nhit_pmt", &m_nhit_pmt, "nhit_pmt/I");
-  // m_tree->Branch("pos", &m_pos);
   m_tree->Branch("pos_x", &m_pos_x);
   m_tree->Branch("pos_y", &m_pos_y);
   m_tree->Branch("pos_z", &m_pos_z);

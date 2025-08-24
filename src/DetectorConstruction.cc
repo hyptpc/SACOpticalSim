@@ -309,54 +309,68 @@ void DetectorConstruction::AddOpticalProperties()
   blacksheet_prop->AddProperty("ABSLENGTH", &photon_energy[0], &absorption_length[0], n_entries);
   m_material_map["BlackSheet"]->SetMaterialPropertiesTable(blacksheet_prop);
 
-  // +----------------------------------------------------------------------+
-  // | Teflon Property                                                      |
-  // | Ref: https://ieeexplore.ieee.org/document/5411657                    |
-  // | Ref: https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=13871 |
-  // | absorption length is set to a small value to ensure it doesn't       |
-  // | emmit cherenkov light inside                                         |
-  // +----------------------------------------------------------------------+
+  // +----------------------------------------------------------------------------+
+  // | Teflon Property                                                            |
+  // | absorption length is set to a small value to ensure it doesn't             |
+  // | emmit cherenkov light inside                                               |
+  // | Reflectivity is based on measurment by Yamamoto-san (2015)                 |
+  // | http://lambda.phys.tohoku.ac.jp/~db/human_resource/thesis/2009_B_3_M_1.pdf |
+  // +----------------------------------------------------------------------------+
   auto teflon_prop = new G4MaterialPropertiesTable();
 
-  photon_energy = {1.84 * eV, 1.92 * eV, 2.01 * eV, 2.11 * eV, 2.22 * eV,
-                   2.33 * eV, 2.47 * eV, 2.61 * eV, 2.78 * eV, 2.97 * eV,
-                   3.19 * eV, 3.43 * eV, 3.72 * eV, 4.07 * eV, 4.48 * eV,
-                   5.01 * eV, 5.57 * eV, 6.06 * eV, 6.48 * eV, 6.72 * eV,
-                   7.15 * eV, 7.45 * eV, 7.59 * eV, 7.73 * eV, 7.83 * eV};
+  photon_energy = {1.54 * eV, 1.76 * eV, 2.06 * eV, 2.47 * eV, 2.75 * eV,
+                   2.94 * eV, 3.09 * eV, 3.17 * eV, 3.25 * eV, 3.34 * eV,
+                   3.43 * eV, 3.53 * eV, 3.64 * eV, 3.75 * eV, 3.86 * eV};
 
-  // refractive_index = {1.349, 1.349, 1.349, 1.349, 1.350,
-  //                     1.350, 1.351, 1.352, 1.353, 1.354,
-  //                     1.356, 1.358, 1.361, 1.365, 1.370,
-  //                     1.379, 1.394, 1.411, 1.432, 1.449,
-  //                     1.528, 1.652, 1.788, 1.673, 1.521};
+  // refractive_index = {};
 
   absorption_length = {1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
                        1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
-                       1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
-                       1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
                        1. * um, 1. * um, 1. * um, 1. * um, 1. * um};
-
-  reflectivity = {0.92, 0.92, 0.93, 0.93, 0.93,
-                  0.93, 0.93, 0.93, 0.93, 0.93,
-                  0.93, 0.94, 0.94, 0.93, 0.93,
-                  0.93, 0.93, 0.93, 0.93, 0.93,
-                  0.93, 0.93, 0.93, 0.93, 0.93}; // rough estimation
 
   n_entries = photon_energy.size();
   // teflon_prop->AddProperty("RINDEX", &photon_energy[0], &refractive_index[0], n_entries);
   teflon_prop->AddProperty("ABSLENGTH", &photon_energy[0], &absorption_length[0], n_entries);
   m_material_map["Teflon"]->SetMaterialPropertiesTable(teflon_prop);
 
-  // Optical surface settings: Aerogel ↔ Teflon (diffuse high reflectance)
-  auto gel_teflon_prop = new G4MaterialPropertiesTable();
-  gel_teflon_prop->AddProperty("REFLECTIVITY", &photon_energy[0], &reflectivity[0], n_entries);
-  gel_teflon_surf = new G4OpticalSurface("GelTeflonSurface");
-  gel_teflon_surf->SetType(dielectric_dielectric);
-  gel_teflon_surf->SetModel(unified);
-  gel_teflon_surf->SetFinish(groundfrontpainted);
-  // gel_teflon_surf->SetFinish(groundbackpainted);
-  gel_teflon_surf->SetSigmaAlpha(0.25); // roughness (tune 0.1–0.3)
-  gel_teflon_surf->SetMaterialPropertiesTable(gel_teflon_prop);
+  // Optical surface settings: Aerogel ↔ Teflon sheet
+  const G4int teflon_layer = gConfMan.GetInt("teflon_layer");
+  const G4int SigmaAlpha = gConfMan.GetInt("SigmaAlpha");
+  if (teflon_layer == 2)
+  {
+    reflectivity = {0.85, 0.90, 0.93, 0.97, 0.98,
+                    0.99, 0.99, 1.00, 1.00, 1.00,
+                    1.00, 1.00, 1.00, 1.00, 1.00};
+  }
+  else if (teflon_layer == 3)
+  {
+    reflectivity = {0.90, 0.93, 0.96, 0.98, 1.00,
+                    0.99, 0.99, 1.00, 1.00, 1.00,
+                    1.00, 1.00, 1.00, 1.00, 1.00};
+  }
+
+  auto gel_steflon_prop = new G4MaterialPropertiesTable();
+  gel_steflon_prop->AddProperty("REFLECTIVITY", &photon_energy[0], &reflectivity[0], n_entries);
+  gel_steflon_surf = new G4OpticalSurface("GelTeflonSheetSurface");
+  gel_steflon_surf->SetType(dielectric_dielectric);
+  gel_steflon_surf->SetModel(unified);
+  gel_steflon_surf->SetFinish(groundfrontpainted);
+  gel_steflon_surf->SetSigmaAlpha(SigmaAlpha); // roughness
+  gel_steflon_surf->SetMaterialPropertiesTable(gel_steflon_prop);
+
+  // Optical surface settings: Aerogel ↔ Teflon frame
+  reflectivity = {0.97, 0.98, 0.99, 1.00, 1.00,
+                  0.99, 0.99, 1.00, 1.00, 1.00,
+                  1.00, 1.00, 1.00, 1.00, 1.00};
+
+  auto gel_fteflon_prop = new G4MaterialPropertiesTable();
+  gel_fteflon_prop->AddProperty("REFLECTIVITY", &photon_energy[0], &reflectivity[0], n_entries);
+  gel_fteflon_surf = new G4OpticalSurface("GelTeflonFrameSurface");
+  gel_fteflon_surf->SetType(dielectric_dielectric);
+  gel_fteflon_surf->SetModel(unified);
+  gel_fteflon_surf->SetFinish(groundfrontpainted);
+  gel_fteflon_surf->SetSigmaAlpha(SigmaAlpha); // roughness
+  gel_fteflon_surf->SetMaterialPropertiesTable(gel_fteflon_prop);
 
   // +-----------------------------------------------------------------+
   // | PMT window (Glass) Property                                     |
@@ -475,8 +489,8 @@ void DetectorConstruction::ConstructSAC()
   auto sheet_top_pv = new G4PVPlacement(nullptr, sheet_pos_top, sheet_lv, "TeflonSheetTopPV", mother_lv, false, 0, m_check_overlaps);
   auto sheet_bot_pv = new G4PVPlacement(nullptr, sheet_pos_bot, sheet_lv, "TeflonSheetBotPV", mother_lv, false, 1, m_check_overlaps);
   sheet_lv->SetVisAttributes(G4Colour::White());
-  new G4LogicalBorderSurface("Gel_TeflonTop", gel_pv, sheet_top_pv, gel_teflon_surf);
-  new G4LogicalBorderSurface("Gel_TeflonBot", gel_pv, sheet_bot_pv, gel_teflon_surf);
+  new G4LogicalBorderSurface("Gel_TeflonTop", gel_pv, sheet_top_pv, gel_steflon_surf);
+  new G4LogicalBorderSurface("Gel_TeflonBot", gel_pv, sheet_bot_pv, gel_steflon_surf);
 
   // ----------------------
   // BlackSheet
@@ -548,7 +562,7 @@ void DetectorConstruction::ConstructSAC()
   auto frame_lv = new G4LogicalVolume(frame, m_material_map["Teflon"], "TeflonFrameLV");
   auto frame_pv = new G4PVPlacement(nullptr, origin, frame_lv, "TeflonFramePV", mother_lv, false, 0, m_check_overlaps);
   frame_lv->SetVisAttributes(G4Colour::White());
-  new G4LogicalBorderSurface("Gel_TeflonFrame", gel_pv, frame_pv, gel_teflon_surf);
+  new G4LogicalBorderSurface("Gel_TeflonFrame", gel_pv, frame_pv, gel_fteflon_surf);
 
   // ----------------------
   // PMT (Window and Casing)
