@@ -18,7 +18,7 @@ after build
 for example
 
 ```
-./SACOpticalSim ../conf/newSAC.conf test.root vis.mac
+./SACOpticalSim ../conf/newSAC.conf test.root run.mac
 ```
 
 newSAC.conf is for the new SAC (PMT 14ch) setup, and oldSAC.conf is for the old SAC (PMT 8ch).

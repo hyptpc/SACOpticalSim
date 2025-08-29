@@ -322,14 +322,16 @@ void DetectorConstruction::AddOpticalProperties()
                    2.94 * eV, 3.09 * eV, 3.17 * eV, 3.25 * eV, 3.34 * eV,
                    3.43 * eV, 3.53 * eV, 3.64 * eV, 3.75 * eV, 3.86 * eV};
 
-  // refractive_index = {};
+  refractive_index = {1.35, 1.35, 1.35, 1.35, 1.35,
+                      1.35, 1.35, 1.35, 1.35, 1.35,
+                      1.35, 1.35, 1.35, 1.35, 1.35};
 
   absorption_length = {1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
                        1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
                        1. * um, 1. * um, 1. * um, 1. * um, 1. * um};
 
   n_entries = photon_energy.size();
-  // teflon_prop->AddProperty("RINDEX", &photon_energy[0], &refractive_index[0], n_entries);
+  teflon_prop->AddProperty("RINDEX", &photon_energy[0], &refractive_index[0], n_entries);
   teflon_prop->AddProperty("ABSLENGTH", &photon_energy[0], &absorption_length[0], n_entries);
   m_material_map["Teflon"]->SetMaterialPropertiesTable(teflon_prop);
 
@@ -354,7 +356,7 @@ void DetectorConstruction::AddOpticalProperties()
   gel_steflon_surf = new G4OpticalSurface("GelTeflonSheetSurface");
   gel_steflon_surf->SetType(dielectric_dielectric);
   gel_steflon_surf->SetModel(unified);
-  gel_steflon_surf->SetFinish(groundfrontpainted);
+  gel_steflon_surf->SetFinish(groundbackpainted);
   gel_steflon_surf->SetSigmaAlpha(SigmaAlpha); // roughness
   gel_steflon_surf->SetMaterialPropertiesTable(gel_steflon_prop);
 

@@ -10,7 +10,8 @@
 #include "G4UnitsTable.hh"
 #include "G4LorentzVector.hh"
 #include "Randomize.hh"
-
+#include "TFile.h"
+#include "TTree.h"
 #include "ConfManager.hh"
 
 namespace
@@ -27,6 +28,13 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
     : G4VUserPrimaryGeneratorAction()
 {
   fParticleGun = new G4ParticleGun(1);
+
+  static const G4String beamfile = "../conf/BeamProfile/" + gConfMan.Get("beamfile");
+  fBeamFile = TFile::Open(beamfile);
+  fBeamTree = (TTree *)fBeamFile->Get("beam");
+  fBeamTree->SetBranchAddress("x", &beam_x);
+  fBeamTree->SetBranchAddress("y", &beam_y);
+  fNEntries = fBeamTree->GetEntries();
 }
 
 PrimaryGeneratorAction::~PrimaryGeneratorAction()
@@ -69,27 +77,27 @@ void PrimaryGeneratorAction::GenerateBeam(G4Event *anEvent)
   // -----------------------
   // Position
   // -----------------------
+  if (fCurrentEntry < fNEntries)
+  {
+    fBeamTree->GetEntry(fCurrentEntry++);
+  }
+  else
+  {
+    G4cerr << "[PrimaryGeneratorAction] Error: fCurrentEntry (" << fCurrentEntry << ") >= fNEntries (" << fNEntries << ")" << G4endl;
+    G4Exception("PrimaryGeneratorAction::GenerateBeam", "BeamEntryOverflow", FatalException, "Number of beam profile entries exceeded.");
+  }
+
   G4double gel_z = gConfMan.GetDouble("gel_size_z") * mm;
   G4double teflon_thickness = gConfMan.GetDouble("teflon_thickness") * mm;
   G4double blacksheet_thickness = gConfMan.GetDouble("BlackSheet_thickness") * mm;
 
-  G4double x = 0.0 * mm;
-  G4double y = 0.0 * mm;
+  G4double x = beam_x * mm;
+  G4double y = beam_y * mm;
   G4double z = -gel_z / 2.0 - teflon_thickness - blacksheet_thickness - 10.0 * mm;
 
   G4ThreeVector position(x, y, z);
   fParticleGun->SetParticlePosition(position);
   gAnaMan.SetBeamPosition(position);
-
-  // -----------------------
-  // Debug
-  // -----------------------
-  // G4cout << "Particle: " << particle->GetParticleName() << G4endl
-  // 	 << " | Energy: " << energy / GeV << " GeV" << G4endl
-  // 	 << " | Momentum: " << momentum / GeV << " GeV/c" << G4endl
-  // 	 << " | Position: (" << x / mm << ", " << y / mm << ", " << z / mm << ") mm"  << G4endl
-  // 	 << " | Direction: (" << direction.x() << ", " << direction.y() << ", " << direction.z() << ")"
-  // 	 << G4endl;
 
   // -----------------------
   // Gus
