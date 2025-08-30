@@ -324,7 +324,7 @@ void DetectorConstruction::AddOpticalProperties()
 
   refractive_index = {1.35, 1.35, 1.35, 1.35, 1.35,
                       1.35, 1.35, 1.35, 1.35, 1.35,
-                      1.35, 1.35, 1.35, 1.35, 1.35};
+                      1.35, 1.35, 1.35, 1.35, 1.35}; // rough setting
 
   absorption_length = {1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
                        1. * um, 1. * um, 1. * um, 1. * um, 1. * um,
@@ -356,7 +356,7 @@ void DetectorConstruction::AddOpticalProperties()
   gel_steflon_surf = new G4OpticalSurface("GelTeflonSheetSurface");
   gel_steflon_surf->SetType(dielectric_dielectric);
   gel_steflon_surf->SetModel(unified);
-  gel_steflon_surf->SetFinish(groundbackpainted);
+  gel_steflon_surf->SetFinish(groundfrontpainted);
   gel_steflon_surf->SetSigmaAlpha(SigmaAlpha); // roughness
   gel_steflon_surf->SetMaterialPropertiesTable(gel_steflon_prop);
 
@@ -419,20 +419,13 @@ void DetectorConstruction::AddOpticalProperties()
                       1.484, 1.485, 1.488, 1.492, 1.497,
                       1.509, 1.535};
 
-  n_entries = photon_energy.size();
-  pom_prop->AddProperty("RINDEX", &photon_energy[0], &refractive_index[0], n_entries);
-
-  photon_energy = {1.79 * eV, 1.87 * eV, 1.97 * eV, 2.06 * eV, 2.17 * eV,
-                   2.29 * eV, 2.43 * eV, 2.59 * eV, 2.76 * eV, 2.94 * eV,
-                   3.18 * eV, 3.44 * eV, 3.78 * eV, 4.15 * eV, 4.61 * eV,
-                   5.20 * eV, 5.89 * eV};
-
   absorption_length = {36.358 * nm, 34.729 * nm, 33.021 * nm, 31.504 * nm, 29.907 * nm,
                        28.293 * nm, 26.683 * nm, 24.989 * nm, 23.386 * nm, 21.959 * nm,
                        20.312 * nm, 18.733 * nm, 17.041 * nm, 15.519 * nm, 13.939 * nm,
                        12.362 * nm, 10.872 * nm};
 
   n_entries = photon_energy.size();
+  pom_prop->AddProperty("RINDEX", &photon_energy[0], &refractive_index[0], n_entries);
   pom_prop->AddProperty("ABSLENGTH", &photon_energy[0], &absorption_length[0], n_entries);
   m_material_map["POM"]->SetMaterialPropertiesTable(pom_prop);
 }
