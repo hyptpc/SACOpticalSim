@@ -21,4 +21,8 @@ for example
 ./SACOpticalSim ../conf/newSAC.conf test.root run.mac
 ```
 
-newSAC.conf is for the new SAC (PMT 14ch) setup, and oldSAC.conf is for the old SAC (PMT 8ch).
+when using BeamProfile, check the event number and set it in the mac file
+
+```
+[root] beam->GetEntries()
+```

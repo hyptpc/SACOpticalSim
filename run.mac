@@ -8,4 +8,4 @@
 /run/initialize
 
 # Number of events to run
-/run/beamOn 9999999
+/run/beamOn 10

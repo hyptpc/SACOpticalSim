@@ -1,3 +1,6 @@
 /build/
 /.vscode/
 /ana/
+*.root
+!/conf/BeamProfile/KEKARrun000304.root
+!/conf/BeamProfile/T110run000328.root
