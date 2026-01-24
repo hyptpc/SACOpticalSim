@@ -136,7 +136,7 @@ void AnaManager::EndOfEventAction(const G4Event *anEvent)
 
   m_tree->Fill();
   m_evnum++;
-  G4cout << m_evnum << ", " << m_nhit_pmt << G4endl;
+  // G4cout << m_evnum << ", " << m_nhit_pmt << G4endl;
 }
 
 void AnaManager::EndOfRunAction(const G4Run *aRun)

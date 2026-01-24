@@ -3,4 +3,5 @@
 /ana/
 *.root
 !/conf/BeamProfile/KEKARrun000304.root
-!/conf/BeamProfile/T110run000328.root
+!/conf/BeamProfile/E63run00088_kaon.root
+!/conf/BeamProfile/E63run00088_pion.root

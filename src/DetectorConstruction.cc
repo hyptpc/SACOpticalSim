@@ -337,7 +337,7 @@ void DetectorConstruction::AddOpticalProperties()
 
   // Optical surface settings: Aerogel ↔ Teflon sheet
   const G4int teflon_layer = gConfMan.GetInt("teflon_layer");
-  const G4int SigmaAlpha = gConfMan.GetInt("SigmaAlpha");
+  const G4double SigmaAlpha = gConfMan.GetDouble("SigmaAlpha");
   if (teflon_layer == 2)
   {
     reflectivity = {0.85, 0.90, 0.93, 0.97, 0.98,

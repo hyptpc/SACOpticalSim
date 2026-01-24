@@ -20,9 +20,3 @@ for example
 ```
 ./SACOpticalSim ../conf/newSAC.conf test.root run.mac
 ```
-
-when using BeamProfile, check the event number and set it in the mac file
-
-```
-[root] beam->GetEntries()
-```
