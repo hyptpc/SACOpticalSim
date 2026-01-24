@@ -2,6 +2,6 @@
 /.vscode/
 /ana/
 *.root
-!/conf/BeamProfile/KEKARrun000304.root
+!/conf/BeamProfile/KEKARrun00304.root
 !/conf/BeamProfile/E63run00088_kaon.root
 !/conf/BeamProfile/E63run00088_pion.root
