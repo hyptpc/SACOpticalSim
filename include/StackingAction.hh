@@ -21,6 +21,7 @@ private:
   G4int fScintillationAll;
   G4int fCerenkovAll;
   G4int fCerenkovAerogel;
+  G4int fCerenkovDelta;
 };
 
 #endif

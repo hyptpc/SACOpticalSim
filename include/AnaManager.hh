@@ -30,6 +30,7 @@ private:
   G4int m_nhit_pmt;
   G4int m_cerenkov_all;
   G4int m_cerenkov_aerogel;
+  G4int m_cerenkov_delta;
   G4double m_beam_energy;
   G4double m_beam_mom_x;
   G4double m_beam_mom_y;
@@ -58,6 +59,7 @@ public:
   void ResetContainer();
   void SetNumOfCerenkovAll(G4int cerenkov_all);
   void SetNumOfCerenkovAerogel(G4int cerenkov_aerogel);
+  void SetNumOfCerenkovDelta(G4int cerenkov_delta);
   void SetBeamEnergy(G4double beam_energy);
   void SetBeamMomentum(G4ThreeVector beam_momentum);
   void SetBeamPosition(G4ThreeVector beam_position);

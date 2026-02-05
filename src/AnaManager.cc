@@ -35,6 +35,7 @@ AnaManager::AnaManager()
       m_nhit_pmt(0),
       m_cerenkov_all(0),
       m_cerenkov_aerogel(0),
+      m_cerenkov_delta(0),
       m_beam_energy(0.),
       m_beam_mom_x(0.),
       m_beam_mom_y(0.),
@@ -58,6 +59,7 @@ void AnaManager::BeginOfRunAction(const G4Run *)
   m_tree->Branch("evnum", &m_evnum, "evnum/I");
   m_tree->Branch("cerenkov_all", &m_cerenkov_all, "cerenkov_all/I");
   m_tree->Branch("cerenkov_aerogel", &m_cerenkov_aerogel, "cerenkov_aerogel/I");
+  m_tree->Branch("cerenkov_delta", &m_cerenkov_delta, "cerenkov_delta/I");
 
   // -- beam -----
   m_tree->Branch("beam_energy", &m_beam_energy, "beam_energy/D");
@@ -171,6 +173,11 @@ void AnaManager::SetNumOfCerenkovAll(G4int cerenkov_all)
 void AnaManager::SetNumOfCerenkovAerogel(G4int cerenkov_aerogel)
 {
   m_cerenkov_aerogel = cerenkov_aerogel;
+}
+
+void AnaManager::SetNumOfCerenkovDelta(G4int cerenkov_delta)
+{
+  m_cerenkov_delta = cerenkov_delta;
 }
 
 void AnaManager::SetBeamEnergy(G4double beam_energy)
