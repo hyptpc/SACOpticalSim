@@ -35,11 +35,11 @@ G4ClassificationOfNewTrack StackingAction::ClassifyNewTrack(const G4Track* aTrac
                 const G4VPhysicalVolume* volume = aTrack->GetVolume();
                 if (volume->GetName() == "GelPV") ++fCerenkovAerogel;
 
-                if (volume) {
-                    G4cout << "Cerenkov photon generated in volume: " << volume->GetName() << G4endl;
-                } else {
-                    G4cout << "Cerenkov photon generated in an unknown volume" << G4endl;
-                }
+                // if (volume) {
+                //     G4cout << "Cerenkov photon generated in volume: " << volume->GetName() << G4endl;
+                // } else {
+                //     G4cout << "Cerenkov photon generated in an unknown volume" << G4endl;
+                // }
             }
         }
     }

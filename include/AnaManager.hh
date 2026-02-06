@@ -49,6 +49,8 @@ private:
   std::vector<G4int> m_particle_id;
   std::vector<G4int> m_seg;
   std::vector<G4int> m_detect_flag;
+  std::vector<G4int> m_delta_flag;
+  std::vector<G4int> m_origin_id;
 
 public:
   void BeginOfRunAction(const G4Run *);

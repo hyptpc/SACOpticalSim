@@ -49,6 +49,14 @@ public:
   void SetDetectFlag(G4int detectFlag) { fDetectFlag = detectFlag; }
   G4int GetDetectFlag() const { return fDetectFlag; }
 
+  // Set and get delta-ray origin flag (1: from delta-ray, 0: otherwise)
+  void SetDeltaFlag(G4int deltaFlag) { fDeltaFlag = deltaFlag; }
+  G4int GetDeltaFlag() const { return fDeltaFlag; }
+
+  // Set and get origin volume ID for photon generation
+  void SetOriginID(G4int originID) { fOriginID = originID; }
+  G4int GetOriginID() const { return fOriginID; }
+
   void Print() const; // Print hit details
 
 private:
@@ -61,6 +69,8 @@ private:
   G4int fCopyNumber;            // PMT copy number
   G4int fEventID;               // Event ID
   G4int fDetectFlag;            // detect flag
+  G4int fDeltaFlag;             // delta-ray origin flag
+  G4int fOriginID;              // origin volume ID for photon generation
 };
 
 // Memory allocator for PMTHit objects

@@ -81,6 +81,8 @@ void AnaManager::BeginOfRunAction(const G4Run *)
   m_tree->Branch("particle_id", &m_particle_id);
   m_tree->Branch("seg", &m_seg);
   m_tree->Branch("detect_flag", &m_detect_flag);
+  m_tree->Branch("delta_flag", &m_delta_flag);
+  m_tree->Branch("origin_id", &m_origin_id);
 }
 
 void AnaManager::BeginOfEventAction(const G4Event *anEvent)
@@ -134,6 +136,12 @@ void AnaManager::EndOfEventAction(const G4Event *anEvent)
 
     G4int detect_flag = aHit->GetDetectFlag();
     m_detect_flag.push_back(detect_flag);
+
+    G4int delta_flag = aHit->GetDeltaFlag();
+    m_delta_flag.push_back(delta_flag);
+
+    G4int origin_id = aHit->GetOriginID();
+    m_origin_id.push_back(origin_id);
   }
 
   m_tree->Fill();
@@ -163,6 +171,8 @@ void AnaManager::ResetContainer()
   m_particle_id.clear();
   m_seg.clear();
   m_detect_flag.clear();
+  m_delta_flag.clear();
+  m_origin_id.clear();
 }
 
 void AnaManager::SetNumOfCerenkovAll(G4int cerenkov_all)

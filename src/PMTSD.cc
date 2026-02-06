@@ -73,6 +73,24 @@ G4bool PMTSD::ProcessHits(G4Step *aStep, G4TouchableHistory *)
   G4int copyNumber = preStepPoint->GetTouchableHandle()->GetCopyNumber();
   G4int eventID = G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID();
   G4int particleID = aTrack->GetDefinition()->GetPDGEncoding();
+  G4int parentID = aTrack->GetParentID();
+  G4int deltaFlag = (parentID > 1) ? 1 : 0;
+  G4int originID = 0;
+  const auto *origin_lv = aTrack->GetLogicalVolumeAtVertex();
+  if (origin_lv)
+  {
+    const auto &name = origin_lv->GetName();
+    if (name == "GelLV")
+      originID = 1; // Aerogel
+    else if (name == "TeflonSheetLV")
+      originID = 2; // Teflon sheet
+    else if (name == "TeflonFrameLV")
+      originID = 3; // Teflon frame
+    else if (name == "BlackSheetLV")
+      originID = 4; // Black sheet
+    else
+      originID = 9; // Other
+  }
 
   // Create hit
   auto *aHit = new PMTHit();
@@ -85,6 +103,8 @@ G4bool PMTSD::ProcessHits(G4Step *aStep, G4TouchableHistory *)
   aHit->SetEventID(eventID);
   aHit->SetDetectFlag(detectFlag);
   aHit->SetParticleID(particleID);
+  aHit->SetDeltaFlag(deltaFlag);
+  aHit->SetOriginID(originID);
 
   m_hits_collection->insert(aHit);
   return true;

@@ -15,7 +15,9 @@ PMTHit::PMTHit()
       fParticleID(0),
       fCopyNumber(0),
       fEventID(0),
-      fDetectFlag(0)
+      fDetectFlag(0),
+      fDeltaFlag(0),
+      fOriginID(0)
 {
 }
 
@@ -32,6 +34,8 @@ PMTHit::PMTHit(const PMTHit &right) : G4VHit()
     fCopyNumber = right.fCopyNumber;
     fEventID = right.fEventID;
     fDetectFlag = right.fDetectFlag;
+    fDeltaFlag = right.fDeltaFlag;
+    fOriginID = right.fOriginID;
 }
 
 void PMTHit::Print() const
