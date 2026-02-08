@@ -9,6 +9,7 @@
 #include "G4SDManager.hh"
 #include "G4TouchableHandle.hh"
 #include "PMTSD.hh"
+#include "TrackInfo.hh"
 
 SteppingAction::SteppingAction()
 {
@@ -24,4 +25,14 @@ SteppingAction::~SteppingAction()
 
 void SteppingAction::UserSteppingAction(const G4Step *step)
 {
+    const auto *track = step->GetTrack();
+    const auto *event = G4RunManager::GetRunManager()->GetCurrentEvent();
+    if (event)
+    {
+        TrackInfo::ResetIfNewEvent(event->GetEventID());
+    }
+    if (track && track->GetCurrentStepNumber() == 1)
+    {
+        TrackInfo::RegisterTrack(track);
+    }
 }

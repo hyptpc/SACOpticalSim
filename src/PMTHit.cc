@@ -16,8 +16,10 @@ PMTHit::PMTHit()
       fCopyNumber(0),
       fEventID(0),
       fDetectFlag(0),
-      fDeltaFlag(0),
-      fOriginID(0)
+      fOriginID(0),
+      fVertexPosition(G4ThreeVector()),
+      fParentID(0),
+      fParentPDG(0)
 {
 }
 
@@ -34,8 +36,10 @@ PMTHit::PMTHit(const PMTHit &right) : G4VHit()
     fCopyNumber = right.fCopyNumber;
     fEventID = right.fEventID;
     fDetectFlag = right.fDetectFlag;
-    fDeltaFlag = right.fDeltaFlag;
     fOriginID = right.fOriginID;
+    fVertexPosition = right.fVertexPosition;
+    fParentID = right.fParentID;
+    fParentPDG = right.fParentPDG;
 }
 
 void PMTHit::Print() const

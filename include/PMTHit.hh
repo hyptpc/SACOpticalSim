@@ -49,13 +49,21 @@ public:
   void SetDetectFlag(G4int detectFlag) { fDetectFlag = detectFlag; }
   G4int GetDetectFlag() const { return fDetectFlag; }
 
-  // Set and get delta-ray origin flag (1: from delta-ray, 0: otherwise)
-  void SetDeltaFlag(G4int deltaFlag) { fDeltaFlag = deltaFlag; }
-  G4int GetDeltaFlag() const { return fDeltaFlag; }
-
   // Set and get origin volume ID for photon generation
   void SetOriginID(G4int originID) { fOriginID = originID; }
   G4int GetOriginID() const { return fOriginID; }
+
+  // Set and get vertex (generation) position of the optical photon
+  void SetVertexPosition(const G4ThreeVector &pos) { fVertexPosition = pos; }
+  G4ThreeVector GetVertexPosition() const { return fVertexPosition; }
+
+  // Set and get parent track ID
+  void SetParentID(G4int parentID) { fParentID = parentID; }
+  G4int GetParentID() const { return fParentID; }
+
+  // Set and get parent particle PDG code
+  void SetParentPDG(G4int parentPDG) { fParentPDG = parentPDG; }
+  G4int GetParentPDG() const { return fParentPDG; }
 
   void Print() const; // Print hit details
 
@@ -69,8 +77,10 @@ private:
   G4int fCopyNumber;            // PMT copy number
   G4int fEventID;               // Event ID
   G4int fDetectFlag;            // detect flag
-  G4int fDeltaFlag;             // delta-ray origin flag
   G4int fOriginID;              // origin volume ID for photon generation
+  G4ThreeVector fVertexPosition; // vertex (generation) position
+  G4int fParentID;              // parent track ID
+  G4int fParentPDG;             // parent particle PDG code
 };
 
 // Memory allocator for PMTHit objects
